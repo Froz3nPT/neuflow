@@ -56,3 +56,6 @@ coverage/
 # OS-specific
 .AppleDouble
 .LSOverride
+
+# Claude Code session/worktree state
+.claude/
