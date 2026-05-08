@@ -1,6 +1,6 @@
 # NeuFlow
 
-Task management built for neurodivergent brains. Side project with Monica Charrua.
+Task management built for neurodivergent brains. Side project with Arina Raven.
 
 ## Stack
 
