@@ -66,16 +66,26 @@ supabase migration new <n> # new migration file
 
 ## Current state
 
-Brain-dump inbox shipped. App.tsx renders a single capture-and-list screen that persists across restarts via AsyncStorage (key `@neuflow/inbox/v1`). Capture bar is at the bottom for thumb reach; tap an item to delete (Alert confirm). No auth — data is local-only and throwaway during dev. No energy tag, trigger, or done-state on inbox items: that's a triage-time decision and lands when InboxItem is promoted into a Task.
+Brain-dump inbox + triage flow + energy filter shipped. App.tsx hosts two views switched by a top segmented toggle:
 
-Domain shape: `InboxItem` lives in `@neuflow/shared/types/inbox` and is intentionally separate from `Task`. They merge once triage is built.
+- **Inbox** — capture bar at the bottom, tap-to-delete (Alert confirm — placeholder; should become snackbar+undo when a UI primitive lands), long-press an item to open the triage sheet.
+- **Tasks** — filter chips above the list (`All / Low / Med / High`), each task shows its energy tag.
+
+Triage sheet is RN's `Modal` (no library). Picking Low / Medium / High moves the item out of inbox storage and into tasks storage with the chosen energy and a `triagedFromInboxId` backref. Both lists persist independently across restarts: `@neuflow/inbox/v1` and `@neuflow/tasks/v1` in AsyncStorage. No auth — data is local-only and throwaway during dev.
+
+Domain shape: `InboxItem` (raw capture) and `Task` (triaged, has energy) are separate types in `@neuflow/shared`. `Task` is intentionally minimal right now — `id`, `text`, `energy`, `createdAt`, `triagedFromInboxId`. Notes, triggers, completion state, and `userId` will return when their features land.
+
+`EnergyLevel` is `'low' | 'med' | 'high'` (note: `med`, not `medium`).
+
+App.tsx is over 300 lines. Splitting into `InboxScreen.tsx` and `TasksScreen.tsx` (plus a `TriageSheet.tsx`) is a reasonable next refactor — flagged as PR follow-up rather than done silently.
 
 Next likely features (not committed):
 
-1. Auth (Supabase magic link) — promotes the local inbox to per-user
-2. Triage flow: InboxItem → Task (assign energy, optional trigger)
-3. Energy tag on tasks + "spoons mode" filter
-4. "What now?" surface (one-task view)
+1. Auth (Supabase magic link) — promotes the local inbox + tasks to per-user
+2. Snackbar+undo primitive — replace the `Alert.alert` delete confirm
+3. "What now?" single-task surface
+4. Procrastination decoder (after N skips, prompt to re-evaluate)
+5. Reintroduce `TaskTrigger` when event-triggered surfacing is built
 
 ## Ground rules for Claude Code
 
