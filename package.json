@@ -1,0 +1,20 @@
+{
+  "name": "neuflow",
+  "version": "0.0.0",
+  "private": true,
+  "description": "NeuFlow — task management built for neurodivergent brains.",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "mobile": "pnpm --filter @neuflow/mobile",
+    "shared": "pnpm --filter @neuflow/shared",
+    "lint": "pnpm -r --parallel run lint",
+    "typecheck": "pnpm -r --parallel run typecheck",
+    "clean": "pnpm -r exec rm -rf node_modules .expo dist"
+  },
+  "devDependencies": {
+    "typescript": "~5.3.3"
+  }
+}
