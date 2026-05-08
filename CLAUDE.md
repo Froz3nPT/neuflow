@@ -4,7 +4,7 @@ This file is loaded automatically by Claude Code. Keep it focused: stack, conven
 
 ## What we're building
 
-NeuFlow is a task manager for neurodivergent brains — primarily ADHD, but the design layer should hold up for autism and dyslexia too. Co-built with Monica Charrua. Edu drives engineering and product.
+NeuFlow is a task manager for neurodivergent brains — primarily ADHD, but the design layer should hold up for autism and dyslexia too. Co-built with Arina Raven. Edu drives engineering and product.
 
 The product thesis: standard productivity tools punish executive-function struggles (rigid periodicity, streaks, infinite lists) and treat the symptom (forgetting) rather than the cause (initiation paralysis, energy mismatch, decision overload). NeuFlow optimises for *getting started*, not *tracking everything*.
 
