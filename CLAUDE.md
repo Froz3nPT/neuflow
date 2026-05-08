@@ -66,13 +66,15 @@ supabase migration new <n> # new migration file
 
 ## Current state
 
-Foundation only. App.tsx renders a placeholder ("Foundation ready. Let's build."). No screens, no auth flow, no data layer beyond a configured Supabase client.
+Brain-dump inbox shipped. App.tsx renders a single capture-and-list screen that persists across restarts via AsyncStorage (key `@neuflow/inbox/v1`). Capture bar is at the bottom for thumb reach; tap an item to delete (Alert confirm). No auth — data is local-only and throwaway during dev. No energy tag, trigger, or done-state on inbox items: that's a triage-time decision and lands when InboxItem is promoted into a Task.
+
+Domain shape: `InboxItem` lives in `@neuflow/shared/types/inbox` and is intentionally separate from `Task`. They merge once triage is built.
 
 Next likely features (not committed):
 
-1. Auth (Supabase magic link)
-2. Brain-dump inbox (the simplest possible capture-and-list)
-3. Energy tag on tasks
+1. Auth (Supabase magic link) — promotes the local inbox to per-user
+2. Triage flow: InboxItem → Task (assign energy, optional trigger)
+3. Energy tag on tasks + "spoons mode" filter
 4. "What now?" surface (one-task view)
 
 ## Ground rules for Claude Code
