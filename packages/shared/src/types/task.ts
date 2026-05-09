@@ -17,6 +17,11 @@ export interface Task {
   energy: EnergyLevel;
   /** ISO 8601 timestamp, set on triage. */
   createdAt: string;
+  /**
+   * ISO 8601 timestamp set when the task is marked done; null when active.
+   * The "Today" view filters on this falling within the local-timezone day.
+   */
+  completedAt: string | null;
   /** Set when this task was promoted from an InboxItem during triage. */
   triagedFromInboxId?: string;
 }

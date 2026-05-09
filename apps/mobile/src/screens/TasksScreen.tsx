@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Pressable,
   StyleSheet,
@@ -8,24 +9,44 @@ import {
 } from 'react-native';
 import type { EnergyLevel, Task } from '@neuflow/shared';
 
-export type EnergyFilter = 'all' | EnergyLevel;
+export type EnergyFilter = 'all' | 'today' | EnergyLevel;
 
 const FILTER_OPTIONS: { value: EnergyFilter; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'low', label: 'Low' },
   { value: 'med', label: 'Med' },
   { value: 'high', label: 'High' },
+  { value: 'today', label: 'Today' },
 ];
 
 export function TasksScreen({
   tasks,
   filter,
   onFilterChange,
+  onToggleComplete,
+  onDelete,
 }: {
   tasks: Task[] | null;
   filter: EnergyFilter;
   onFilterChange: (next: EnergyFilter) => void;
+  onToggleComplete: (id: string) => void;
+  onDelete: (id: string) => void;
 }) {
+  const isToday = filter === 'today';
+
+  const handleLongPress = (task: Task) => {
+    // Destructive needs friction. Tap-to-complete is reversible (tap again);
+    // delete isn't, and we don't have a snackbar+undo primitive yet.
+    Alert.alert('Delete this task?', task.text, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => onDelete(task.id),
+      },
+    ]);
+  };
+
   return (
     <View style={styles.tasksContainer}>
       <View style={styles.filters}>
@@ -55,27 +76,59 @@ export function TasksScreen({
         </View>
       ) : tasks.length === 0 ? (
         <View style={styles.center}>
-          <Text style={styles.empty}>
-            {filter === 'all'
-              ? 'No tasks yet.\nLong-press an inbox item to triage it.'
-              : 'Nothing matches this energy filter.'}
-          </Text>
+          <Text style={styles.empty}>{emptyCopy(filter)}</Text>
         </View>
       ) : (
         <FlatList
           data={tasks}
           keyExtractor={(task) => task.id}
-          renderItem={({ item }) => (
-            <View style={styles.item}>
-              <Text style={styles.itemText}>{item.text}</Text>
-              <Text style={styles.energyTag}>{energyLabel(item.energy)}</Text>
-            </View>
-          )}
+          renderItem={({ item }) => {
+            const completed = item.completedAt !== null;
+            const dim = isToday && completed;
+            return (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.item,
+                  pressed && styles.itemPressed,
+                ]}
+                onPress={() => onToggleComplete(item.id)}
+                onLongPress={() => handleLongPress(item)}
+              >
+                <Text
+                  style={[
+                    styles.itemText,
+                    dim && styles.itemTextDone,
+                  ]}
+                >
+                  {item.text}
+                </Text>
+                <Text
+                  style={[
+                    styles.energyTag,
+                    dim && styles.energyTagDone,
+                  ]}
+                >
+                  {energyLabel(item.energy)}
+                </Text>
+              </Pressable>
+            );
+          }}
           contentContainerStyle={styles.listContent}
         />
       )}
     </View>
   );
+}
+
+function emptyCopy(filter: EnergyFilter): string {
+  switch (filter) {
+    case 'all':
+      return 'No tasks yet.\nLong-press an inbox item to triage it.';
+    case 'today':
+      return "Nothing finished today — yet.\nTap a task to mark it done.";
+    default:
+      return 'Nothing matches this energy filter.';
+  }
 }
 
 function energyLabel(energy: EnergyLevel): string {
@@ -95,6 +148,7 @@ const styles = StyleSheet.create({
   },
   filters: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingHorizontal: 16,
     paddingBottom: 8,
     gap: 8,
@@ -143,11 +197,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
+  itemPressed: {
+    backgroundColor: '#e4e4e7',
+  },
   itemText: {
     flex: 1,
     fontSize: 16,
     color: '#111827',
     lineHeight: 22,
+  },
+  itemTextDone: {
+    opacity: 0.6,
+    textDecorationLine: 'line-through',
   },
   energyTag: {
     fontSize: 12,
@@ -158,5 +219,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 6,
     overflow: 'hidden',
+  },
+  energyTagDone: {
+    opacity: 0.6,
   },
 });

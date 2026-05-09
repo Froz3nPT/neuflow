@@ -112,6 +112,7 @@ export default function App() {
         text: source.text,
         energy,
         createdAt: new Date().toISOString(),
+        completedAt: null,
         triagedFromInboxId: source.id,
       };
       persistTasks([promoted, ...(tasks ?? [])]);
@@ -121,10 +122,45 @@ export default function App() {
     [items, persistInbox, persistTasks, tasks, triageItem],
   );
 
+  const handleToggleComplete = useCallback(
+    (id: string) => {
+      const next = (tasks ?? []).map((t) =>
+        t.id === id
+          ? { ...t, completedAt: t.completedAt === null ? new Date().toISOString() : null }
+          : t,
+      );
+      persistTasks(next);
+    },
+    [persistTasks, tasks],
+  );
+
+  const handleDeleteTask = useCallback(
+    (id: string) => {
+      persistTasks((tasks ?? []).filter((t) => t.id !== id));
+    },
+    [persistTasks, tasks],
+  );
+
   const filteredTasks = useMemo(() => {
     if (!tasks) return null;
-    if (filter === 'all') return tasks;
-    return tasks.filter((t) => t.energy === filter);
+    if (filter === 'today') {
+      const today = new Date().toDateString();
+      return tasks
+        .filter(
+          (t) =>
+            t.completedAt !== null &&
+            new Date(t.completedAt).toDateString() === today,
+        )
+        .sort((a, b) => {
+          // completedAt is non-null on both sides — checked above.
+          const aT = a.completedAt ?? '';
+          const bT = b.completedAt ?? '';
+          return bT.localeCompare(aT);
+        });
+    }
+    const active = tasks.filter((t) => t.completedAt === null);
+    if (filter === 'all') return active;
+    return active.filter((t) => t.energy === filter);
   }, [tasks, filter]);
 
   return (
@@ -154,6 +190,8 @@ export default function App() {
             tasks={filteredTasks}
             filter={filter}
             onFilterChange={setFilter}
+            onToggleComplete={handleToggleComplete}
+            onDelete={handleDeleteTask}
           />
         )}
 
