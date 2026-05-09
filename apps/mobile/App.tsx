@@ -15,15 +15,17 @@ import type { EnergyLevel, InboxItem, Task } from '@neuflow/shared';
 import { loadInbox, loadTasks, saveInbox, saveTasks } from './src/lib/storage';
 import { InboxScreen } from './src/screens/InboxScreen';
 import { TasksScreen, type EnergyFilter } from './src/screens/TasksScreen';
+import { WhatNowScreen } from './src/screens/WhatNowScreen';
 import { TriageSheet } from './src/components/TriageSheet';
 import { tokens } from './src/design/tokens';
 
-// Two-screen app: Inbox (raw capture) and Tasks (triaged, with energy). A
-// single segmented toggle at the top swaps which list is visible. We don't
-// reach for a navigation library yet — two views and conditional render is
-// less ceremony than a stack.
+// Three-segment app: Inbox (raw capture), What now? (single-task focus),
+// Tasks (triaged list). A segmented toggle at the top swaps which view is
+// visible. "What now?" sits in the middle on purpose — it's the headline
+// feature, not a side door. We don't reach for a navigation library yet —
+// three views and conditional render is less ceremony than a stack.
 
-type ViewKey = 'inbox' | 'tasks';
+type ViewKey = 'inbox' | 'whatnow' | 'tasks';
 
 function newId() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -114,6 +116,7 @@ export default function App() {
         energy,
         createdAt: new Date().toISOString(),
         completedAt: null,
+        skipCount: 0,
         triagedFromInboxId: source.id,
       };
       persistTasks([promoted, ...(tasks ?? [])]);
@@ -138,6 +141,19 @@ export default function App() {
   const handleDeleteTask = useCallback(
     (id: string) => {
       persistTasks((tasks ?? []).filter((t) => t.id !== id));
+    },
+    [persistTasks, tasks],
+  );
+
+  const handleSkipTask = useCallback(
+    (id: string) => {
+      // Increments lifetime skipCount. There's no UI for this yet — the
+      // number is read by the future procrastination decoder ("after N
+      // skips, ask: still relevant? too big? wrong time?").
+      const next = (tasks ?? []).map((t) =>
+        t.id === id ? { ...t, skipCount: t.skipCount + 1 } : t,
+      );
+      persistTasks(next);
     },
     [persistTasks, tasks],
   );
@@ -174,6 +190,11 @@ export default function App() {
             onPress={() => setView('inbox')}
           />
           <TabButton
+            label="What now?"
+            active={view === 'whatnow'}
+            onPress={() => setView('whatnow')}
+          />
+          <TabButton
             label="Tasks"
             active={view === 'tasks'}
             onPress={() => setView('tasks')}
@@ -185,6 +206,12 @@ export default function App() {
             items={items}
             onLongPress={(item) => setTriageItem(item)}
             onPress={handleDelete}
+          />
+        ) : view === 'whatnow' ? (
+          <WhatNowScreen
+            tasks={tasks}
+            onComplete={handleToggleComplete}
+            onSkip={handleSkipTask}
           />
         ) : (
           <TasksScreen
