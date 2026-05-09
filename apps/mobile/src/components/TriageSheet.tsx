@@ -1,10 +1,12 @@
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { EnergyLevel, InboxItem } from '@neuflow/shared';
+import { tokens } from '../design/tokens';
+import { EnergyGlyph } from '../design/EnergyGlyph';
 
-const TRIAGE_OPTIONS: { value: EnergyLevel; label: string }[] = [
-  { value: 'low', label: 'Low' },
-  { value: 'med', label: 'Medium' },
-  { value: 'high', label: 'High' },
+const TRIAGE_OPTIONS: { value: EnergyLevel; label: string; hint: string }[] = [
+  { value: 'low', label: 'Low', hint: 'Doable when depleted' },
+  { value: 'med', label: 'Medium', hint: 'Needs some fuel' },
+  { value: 'high', label: 'High', hint: 'Save for a strong moment' },
 ];
 
 export function TriageSheet({
@@ -29,18 +31,35 @@ export function TriageSheet({
           {item?.text ?? ''}
         </Text>
         <Text style={styles.sheetPrompt}>How much energy will this take?</Text>
-        {TRIAGE_OPTIONS.map((opt) => (
-          <Pressable
-            key={opt.value}
-            style={({ pressed }) => [
-              styles.energyBtn,
-              pressed && styles.energyBtnPressed,
-            ]}
-            onPress={() => onPick(opt.value)}
-          >
-            <Text style={styles.energyBtnText}>{opt.label}</Text>
-          </Pressable>
-        ))}
+        {TRIAGE_OPTIONS.map((opt) => {
+          const energy = tokens.colors.energy[opt.value];
+          return (
+            <Pressable
+              key={opt.value}
+              style={({ pressed }) => [
+                styles.energyBtn,
+                {
+                  backgroundColor: energy.bg,
+                  borderColor: energy.border,
+                },
+                pressed && { opacity: 0.85 },
+              ]}
+              onPress={() => onPick(opt.value)}
+            >
+              <View style={styles.energyBtnGlyph}>
+                <EnergyGlyph energy={opt.value} />
+              </View>
+              <View style={styles.energyBtnLabels}>
+                <Text style={[styles.energyBtnLabel, { color: energy.fg }]}>
+                  {opt.label}
+                </Text>
+                <Text style={[styles.energyBtnHint, { color: energy.fg }]}>
+                  {opt.hint}
+                </Text>
+              </View>
+            </Pressable>
+          );
+        })}
         <Pressable style={styles.cancelBtn} onPress={onCancel}>
           <Text style={styles.cancelBtnText}>Cancel</Text>
         </Pressable>
@@ -52,14 +71,14 @@ export function TriageSheet({
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: tokens.colors.overlay.backdrop,
   },
   sheet: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#fff',
+    backgroundColor: tokens.colors.surface.elevated,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingHorizontal: 20,
@@ -70,26 +89,38 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    color: tokens.colors.text.primary,
   },
   sheetPrompt: {
     fontSize: 14,
-    color: '#6b7280',
+    color: tokens.colors.text.secondary,
     marginBottom: 6,
   },
   energyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
     paddingVertical: 16,
-    borderRadius: 12,
-    backgroundColor: '#f4f4f5',
+    paddingHorizontal: 18,
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  energyBtnGlyph: {
+    width: 28,
     alignItems: 'center',
   },
-  energyBtnPressed: {
-    backgroundColor: '#e4e4e7',
+  energyBtnLabels: {
+    flex: 1,
   },
-  energyBtnText: {
+  energyBtnLabel: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#111827',
+  },
+  energyBtnHint: {
+    fontSize: 13,
+    fontWeight: '400',
+    opacity: 0.85,
+    marginTop: 2,
   },
   cancelBtn: {
     paddingVertical: 14,
@@ -98,6 +129,6 @@ const styles = StyleSheet.create({
   },
   cancelBtnText: {
     fontSize: 16,
-    color: '#6b7280',
+    color: tokens.colors.text.secondary,
   },
 });
