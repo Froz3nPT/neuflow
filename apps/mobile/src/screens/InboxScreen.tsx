@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import type { InboxItem } from '@neuflow/shared';
+import { tokens } from '../design/tokens';
 
 export function InboxScreen({
   items,
@@ -61,7 +62,7 @@ const styles = StyleSheet.create({
   },
   empty: {
     fontSize: 16,
-    color: '#6b7280',
+    color: tokens.colors.text.secondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -73,7 +74,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 12,
-    backgroundColor: '#f4f4f5',
+    backgroundColor: tokens.colors.surface.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: tokens.colors.border.subtle,
     marginTop: 8,
     flexDirection: 'row',
     alignItems: 'center',
@@ -81,12 +84,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   itemPressed: {
-    backgroundColor: '#e4e4e7',
+    backgroundColor: tokens.colors.border.subtle,
   },
   itemText: {
     flex: 1,
     fontSize: 16,
-    color: '#111827',
+    color: tokens.colors.text.primary,
     lineHeight: 22,
   },
 });

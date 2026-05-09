@@ -16,6 +16,7 @@ import { loadInbox, loadTasks, saveInbox, saveTasks } from './src/lib/storage';
 import { InboxScreen } from './src/screens/InboxScreen';
 import { TasksScreen, type EnergyFilter } from './src/screens/TasksScreen';
 import { TriageSheet } from './src/components/TriageSheet';
+import { tokens } from './src/design/tokens';
 
 // Two-screen app: Inbox (raw capture) and Tasks (triaged, with energy). A
 // single segmented toggle at the top swaps which list is visible. We don't
@@ -203,7 +204,7 @@ export default function App() {
               <TextInput
                 style={styles.input}
                 placeholder="What's on your mind?"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={tokens.colors.text.muted}
                 value={draft}
                 onChangeText={setDraft}
                 multiline
@@ -255,14 +256,14 @@ function TabButton({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: tokens.colors.surface.background,
   },
   tabs: {
     flexDirection: 'row',
     marginHorizontal: 16,
     marginTop: 8,
     marginBottom: 12,
-    backgroundColor: '#f4f4f5',
+    backgroundColor: tokens.colors.border.subtle,
     borderRadius: 12,
     padding: 4,
   },
@@ -273,8 +274,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabActive: {
-    backgroundColor: '#fff',
-    shadowColor: '#000',
+    backgroundColor: tokens.colors.surface.card,
+    shadowColor: tokens.colors.text.primary,
     shadowOpacity: 0.06,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 1 },
@@ -283,10 +284,10 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#6b7280',
+    color: tokens.colors.text.secondary,
   },
   tabTextActive: {
-    color: '#111827',
+    color: tokens.colors.text.primary,
     fontWeight: '600',
   },
   composer: {
@@ -295,7 +296,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#e4e4e7',
+    borderTopColor: tokens.colors.border.subtle,
     gap: 8,
   },
   input: {
@@ -303,25 +304,27 @@ const styles = StyleSheet.create({
     minHeight: 44,
     maxHeight: 140,
     borderRadius: 12,
-    backgroundColor: '#f4f4f5',
+    backgroundColor: tokens.colors.surface.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: tokens.colors.border.subtle,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 16,
-    color: '#111827',
+    color: tokens.colors.text.primary,
   },
   sendBtn: {
     paddingHorizontal: 18,
     height: 44,
     borderRadius: 12,
-    backgroundColor: '#111827',
+    backgroundColor: tokens.colors.accent.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   sendBtnDisabled: {
-    backgroundColor: '#a1a1aa',
+    backgroundColor: tokens.colors.border.strong,
   },
   sendBtnText: {
-    color: '#fff',
+    color: tokens.colors.accent.primaryFg,
     fontSize: 16,
     fontWeight: '600',
   },

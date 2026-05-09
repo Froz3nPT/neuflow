@@ -8,6 +8,8 @@ import {
   View,
 } from 'react-native';
 import type { EnergyLevel, Task } from '@neuflow/shared';
+import { tokens } from '../design/tokens';
+import { EnergyGlyph } from '../design/EnergyGlyph';
 
 export type EnergyFilter = 'all' | 'today' | EnergyLevel;
 
@@ -51,28 +53,18 @@ export function TasksScreen({
     <View style={styles.tasksContainer}>
       <View style={styles.filters}>
         {FILTER_OPTIONS.map((opt) => (
-          <Pressable
+          <FilterChip
             key={opt.value}
-            style={[
-              styles.chip,
-              filter === opt.value && styles.chipActive,
-            ]}
+            value={opt.value}
+            label={opt.label}
+            active={filter === opt.value}
             onPress={() => onFilterChange(opt.value)}
-          >
-            <Text
-              style={[
-                styles.chipText,
-                filter === opt.value && styles.chipTextActive,
-              ]}
-            >
-              {opt.label}
-            </Text>
-          </Pressable>
+          />
         ))}
       </View>
       {tasks === null ? (
         <View style={styles.center}>
-          <ActivityIndicator />
+          <ActivityIndicator color={tokens.colors.text.secondary} />
         </View>
       ) : tasks.length === 0 ? (
         <View style={styles.center}>
@@ -85,6 +77,7 @@ export function TasksScreen({
           renderItem={({ item }) => {
             const completed = item.completedAt !== null;
             const dim = isToday && completed;
+            const energyColors = tokens.colors.energy[item.energy];
             return (
               <Pressable
                 style={({ pressed }) => [
@@ -102,14 +95,26 @@ export function TasksScreen({
                 >
                   {item.text}
                 </Text>
-                <Text
+                <View
                   style={[
                     styles.energyTag,
+                    {
+                      backgroundColor: energyColors.bg,
+                      borderColor: energyColors.border,
+                    },
                     dim && styles.energyTagDone,
                   ]}
                 >
-                  {energyLabel(item.energy)}
-                </Text>
+                  <EnergyGlyph energy={item.energy} />
+                  <Text
+                    style={[
+                      styles.energyTagText,
+                      { color: energyColors.fg },
+                    ]}
+                  >
+                    {energyLabel(item.energy)}
+                  </Text>
+                </View>
               </Pressable>
             );
           }}
@@ -117,6 +122,69 @@ export function TasksScreen({
         />
       )}
     </View>
+  );
+}
+
+function FilterChip({
+  value,
+  label,
+  active,
+  onPress,
+}: {
+  value: EnergyFilter;
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  // Energy filters take on the matching energy tone when active so the
+  // active state itself signals which axis the user is filtering by.
+  // 'all' / 'today' aren't on the energy axis, so they fall back to
+  // accent.
+  if (value === 'low' || value === 'med' || value === 'high') {
+    const energy = tokens.colors.energy[value];
+    return (
+      <Pressable
+        style={[
+          styles.chip,
+          active
+            ? { backgroundColor: energy.bg, borderColor: energy.border }
+            : styles.chipInactive,
+        ]}
+        onPress={onPress}
+      >
+        <EnergyGlyph energy={value} />
+        <Text
+          style={[
+            styles.chipText,
+            { color: active ? energy.fg : tokens.colors.text.secondary },
+          ]}
+        >
+          {label}
+        </Text>
+      </Pressable>
+    );
+  }
+  return (
+    <Pressable
+      style={[
+        styles.chip,
+        active ? styles.chipActiveAccent : styles.chipInactive,
+      ]}
+      onPress={onPress}
+    >
+      <Text
+        style={[
+          styles.chipText,
+          {
+            color: active
+              ? tokens.colors.accent.primaryFg
+              : tokens.colors.text.secondary,
+          },
+        ]}
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -154,21 +222,25 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderRadius: 999,
-    backgroundColor: '#f4f4f5',
+    borderWidth: StyleSheet.hairlineWidth,
   },
-  chipActive: {
-    backgroundColor: '#111827',
+  chipInactive: {
+    backgroundColor: tokens.colors.surface.card,
+    borderColor: tokens.colors.border.subtle,
+  },
+  chipActiveAccent: {
+    backgroundColor: tokens.colors.accent.primary,
+    borderColor: tokens.colors.accent.primary,
   },
   chipText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6b7280',
-  },
-  chipTextActive: {
-    color: '#fff',
   },
   center: {
     flex: 1,
@@ -178,7 +250,7 @@ const styles = StyleSheet.create({
   },
   empty: {
     fontSize: 16,
-    color: '#6b7280',
+    color: tokens.colors.text.secondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -190,7 +262,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 12,
-    backgroundColor: '#f4f4f5',
+    backgroundColor: tokens.colors.surface.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: tokens.colors.border.subtle,
     marginTop: 8,
     flexDirection: 'row',
     alignItems: 'center',
@@ -198,12 +272,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   itemPressed: {
-    backgroundColor: '#e4e4e7',
+    backgroundColor: tokens.colors.border.subtle,
   },
   itemText: {
     flex: 1,
     fontSize: 16,
-    color: '#111827',
+    color: tokens.colors.text.primary,
     lineHeight: 22,
   },
   itemTextDone: {
@@ -211,14 +285,17 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
   },
   energyTag: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#6b7280',
-    backgroundColor: '#e4e4e7',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
-    overflow: 'hidden',
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  energyTagText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   energyTagDone: {
     opacity: 0.6,
