@@ -22,6 +22,13 @@ export interface Task {
    * The "Today" view filters on this falling within the local-timezone day.
    */
   completedAt: string | null;
+  /**
+   * Lifetime count of times the user pressed Skip on this task in the
+   * "What now?" surface. Surfaced no UI yet; this is history for the future
+   * procrastination decoder ("after N skips, ask: still relevant? too big?
+   * wrong time?"). Defaults to 0 on existing tasks via storage migration.
+   */
+  skipCount: number;
   /** Set when this task was promoted from an InboxItem during triage. */
   triagedFromInboxId?: string;
 }
