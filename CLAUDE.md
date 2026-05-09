@@ -94,6 +94,10 @@ Next likely features (not committed):
 - **Be honest about uncertainty.** If a Supabase API or Expo SDK detail is past the model's knowledge cutoff, say so before guessing.
 - **Don't write README sections claiming the product does things it doesn't.** This repo is a scaffold; treat it like one until features actually land.
 
+## Session hygiene
+
+- **Clean up worktrees before finishing.** If you create a git worktree for isolated work during a session, remove it with `git worktree remove --force <path>` before finishing the session. Don't leave entries under `.claude/worktrees/`. They'll block branch checkouts in the main worktree (`fatal: '<branch>' is already used by worktree at...`).
+
 ## Reference
 
 - Expo monorepo guide: https://docs.expo.dev/guides/monorepos/
